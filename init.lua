@@ -129,7 +129,7 @@ end
 ---  * This function will log information about its progress, including whether the API request and image parsing were successful,
 ---  and the remaining rate limit for the Unsplash API.
 function obj.set_new_background()
-	logger.d("Setting new background papirrin")
+	logger.d("Setting new background...")
 
 	hs.http.asyncGet(obj.unsplash_api_url, {}, function(stat, body, header)
 		logger.d("Received response from unsplash")
