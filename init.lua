@@ -2,14 +2,14 @@
 ---
 --- Use Unsplash API to set a random background image for your desktop
 ---
---- Download: [TODO](TODO)
+--- Download: [https://github.com/roeeyn/RandomBackground.spoon/releases/download/v1.1.0/RandomBackground.spoon.zip](https://github.com/roeeyn/RandomBackground.spoon/releases/download/v1.1.0/RandomBackground.spoon.zip)
 
 local obj = {}
 obj.__index = obj
 
 -- Metadata
 obj.name = "RandomBackground"
-obj.version = "0.1"
+obj.version = "1.1"
 obj.author = "Rodrigo Medina <rodrigo.medina.neri@gmail.com>"
 obj.homepage = "https://github.com/roeeyn/RandomBackground.spoon"
 obj.license = "MIT - https://opensource.org/licenses/MIT"
@@ -19,7 +19,7 @@ local UNSPLASH_API_URL = "https://api.unsplash.com/photos/random/?orientation=la
 
 local logger = hs.logger.new(obj.name, "debug")
 
---- curl_download_callback(exitCode, stdOut, stdErr)
+--- RandomBackground.curl_download_callback(exitCode, stdOut, stdErr) -> nil
 --- Function
 --- Callback for when the curl command finishes downloading the image.
 ---
@@ -37,8 +37,7 @@ local logger = hs.logger.new(obj.name, "debug")
 --- Notes:
 ---  * If the task finishes successfully (exitCode == 0), this function sets the downloaded image as the desktop background on the main screen and logs a success message.
 ---  * If the task does not finish successfully, this function logs an error message along with the standard output and standard error of the task.
-
-local function curl_download_callback(exitCode, stdOut, stdErr)
+function obj.curl_download_callback(exitCode, stdOut, stdErr)
 	if exitCode == 0 then
 		obj.task = nil
 		hs.screen.mainScreen():desktopImageURL("file://" .. obj.localpath)
@@ -49,7 +48,7 @@ local function curl_download_callback(exitCode, stdOut, stdErr)
 	end
 end
 
---- get_download_link(response_body)
+--- RandomBackground.get_download_link(response_body)
 --- Function
 --- Extracts and returns the download link from a response body.
 ---
@@ -66,7 +65,7 @@ end
 --- Notes:
 ---  * This function uses the protected call (`pcall`) function in Lua to handle potential errors when decoding the JSON response body.
 ---  * If the decoding fails (due to invalid JSON, for example), it will return `nil`.
-local function get_download_link(response_body)
+function obj.get_download_link(response_body)
 	local ok, decoded_data = pcall(hs.json.decode, response_body)
 	if ok and decoded_data and decoded_data.links and decoded_data.links.download then
 		return decoded_data.links.download
@@ -75,7 +74,7 @@ local function get_download_link(response_body)
 	end
 end
 
---- download_img_request(image_url)
+--- RandomBackground.download_img_request(image_url)
 --- Function
 --- Downloads an image from a given URL and stores it in the system's Trash folder.
 ---
@@ -94,7 +93,7 @@ end
 ---  * This function will log information about its progress, including the URL of the image being downloaded.
 ---  * The downloaded image file is saved with a hashed name to prevent naming conflicts.
 ---  * The image is saved in the Trash folder as it is intended to be a temp file used only for setting the wallpaper.
-local function download_img_request(image_url)
+function obj.download_img_request(image_url)
 	-- cancel any pending request
 	if obj.task then
 		obj.task:terminate()
@@ -107,11 +106,11 @@ local function download_img_request(image_url)
 
 	-- set as download path the Trash folder, as we only want to set the wallpaper once
 	obj.localpath = os.getenv("HOME") .. "/.Trash/" .. temp_img_name .. "_background.jpg"
-	obj.task = hs.task.new("/usr/bin/curl", curl_download_callback, { "-L", image_url, "-o", obj.localpath })
+	obj.task = hs.task.new("/usr/bin/curl", obj.curl_download_callback, { "-L", image_url, "-o", obj.localpath })
 	obj.task:start()
 end
 
---- set_new_background()
+--- RandomBackground.set_new_background()
 --- Function
 --- Sets a new background for the system using a randomly fetched image from Unsplash.
 ---
@@ -129,7 +128,7 @@ end
 --- Notes:
 ---  * This function will log information about its progress, including whether the API request and image parsing were successful,
 ---  and the remaining rate limit for the Unsplash API.
-local function set_new_background()
+function obj.set_new_background()
 	logger.d("Setting new background papirrin")
 
 	hs.http.asyncGet(obj.unsplash_api_url, {}, function(stat, body, header)
@@ -143,7 +142,7 @@ local function set_new_background()
 
 		logger.d("Successful response status. Processing download link")
 
-		local download_link = get_download_link(body)
+		local download_link = obj.get_download_link(body)
 		if download_link == nil then
 			logger.d("Unsplash API response JSON parsing failed")
 			return false
@@ -151,12 +150,12 @@ local function set_new_background()
 
 		logger.d("Successful download link parsing.")
 
-		return pcall(download_img_request, download_link)
+		return pcall(obj.download_img_request, download_link)
 	end)
 end
 
---- obj:start()
---- Method: start
+--- RandomBackground:start()
+--- Method
 ---
 --- This method starts the RandomBackground spoon. It sets the URL for the Unsplash API with the provided API key.
 --- and initiates the timer to change the desktop background.
@@ -191,14 +190,14 @@ function obj:start()
 
 	logger.d("Started the RandomBackground spoon")
 	if obj.timer == nil then
-		obj.timer = hs.timer.doEvery(UPDATE_INTERVAL_SECONDS, set_new_background)
+		obj.timer = hs.timer.doEvery(UPDATE_INTERVAL_SECONDS, obj.set_new_background)
 		obj.timer:setNextTrigger(5)
 	else
 		obj.timer:start()
 	end
 end
 
---- obj:stop()
+--- RandomBackground:stop()
 --- Method
 --- Stops the RandomBackground Spoon.
 ---
@@ -223,7 +222,7 @@ function obj:stop()
 	end
 end
 
---- obj:init()
+--- RandomBackground:init()
 --- Method
 --- Initializes the RandomBackground Spoon.
 ---
