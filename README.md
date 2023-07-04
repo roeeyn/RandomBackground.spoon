@@ -21,6 +21,8 @@
 
 ## Usage
 
+After downloading the ZIP of the project, and uncompressing it as `~/.hammerspoon/Spoons/RandomBackground.spoon/`:
+
 ### Directly Setting the API Key
 
 You can directly set the API key in your Hammerspoon configuration:

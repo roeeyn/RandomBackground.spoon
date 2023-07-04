@@ -2,7 +2,6 @@
 ---
 --- Use Unsplash API to set a random background image for your desktop
 ---
---- Download: [https://github.com/Hammerspoon/Spoons/raw/master/Spoons/BingDaily.spoon.zip](https://github.com/Hammerspoon/Spoons/raw/master/Spoons/BingDaily.spoon.zip)
 --- Download: [TODO](TODO)
 
 local obj = {}
