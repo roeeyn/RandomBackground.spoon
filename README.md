@@ -23,6 +23,43 @@
 
 After downloading the ZIP of the project, and uncompressing it as `~/.hammerspoon/Spoons/RandomBackground.spoon/`:
 
+### Saving the API Key in a File (Recommended)
+
+For convenience and security, you may choose to store your Unsplash API key in a dedicated file named `.unsplash_api_key` located in your home directory.
+
+To create this file, first copy your API key to your clipboard, then execute the following command in your terminal: `pbpaste > ~/.unsplash_api_key`. This command pastes your copied key into the newly created file.
+
+Once this step is complete, you can read the API key from this file within your `init.lua` script and use it to configure the `RandomBackground` spoon. The following snippet provides an example of how this can be achieved:
+
+```lua
+local function read_api_key(file_path)
+    local file = io.open(file_path, 'r') -- open in read mode
+    if not file then
+        return nil
+    end
+
+    local content = file:read '*a' -- *a or *all reads the entire file
+    file:close()
+
+    return content:gsub('%s+$', '') -- remove trailing spaces
+end
+
+-- Assumes that the API Key is stored in ~/.unsplash_api_key
+local api_key = read_api_key(os.getenv("HOME") .. "/.unsplash_api_key")
+
+-- After installing the spoon
+hs.spoons.use('RandomBackground', {
+    -- OPTIONAL: Uncomment this line to enable printing of debug messages to the console.
+    -- loglevel = 'debug',
+    config = {
+        -- REQUIRED: Your Unsplash API KEY
+        unsplash_api_key = api_key
+    },
+    -- REQUIRED: To start the task that will download and set the desktop image.
+    start = true,
+}, true)
+```
+
 ### Directly Setting the API Key
 
 You can directly set the API key in your Hammerspoon configuration:
