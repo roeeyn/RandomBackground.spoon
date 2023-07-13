@@ -58,6 +58,7 @@ hs.spoons.use('RandomBackground', {
     -- REQUIRED: To start the task that will download and set the desktop image.
     start = true,
 }, true)
+```
 
 ### Directly Setting the API Key
 
